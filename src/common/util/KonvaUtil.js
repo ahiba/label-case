@@ -11,27 +11,33 @@ export function fitStageIntoParentContainer(container, stageWidth, stageHeight, 
     stage.draw();
 }
 
-export function drawImgCenter(imgW, imgH, cvsW, cvsH){
-    let scale = imgW / imgH;
+export function getDrewImageBodyInfo(imgW, imgH, cvsW, cvsH){
+
     let res = {};
 
-    // 第一种情况 图片的宽度比高度大
+    let stageRatio = cvsW/cvsH,
+        imgRatio = imgW/imgH;
 
-    if(imgW >= imgH){
-        res.w = cvsW;
-        res.h = res.w / scale;
-        res.x = (cvsW - res.w) / 2;
-        res.y = (cvsH - res.h) / 2;
-        res.scale = imgW / res.w;
-    }
+    if( imgRatio < stageRatio ){
 
-    // 第二种情况 图片的高度比宽度大
-    if(imgW <= imgH){
+        let scale = cvsH/imgH;
+
+        res.w = imgW * scale;
         res.h = cvsH;
-        res.w = res.h * scale;
-        res.x = (cvsW - res.w) / 2;
-        res.y = (cvsH - res.h) / 2;
-        res.scale = imgH / res.h;
+        res.x = ( cvsW - res.w ) / 2;
+        res.y = 0;
+        res.scale = scale;
+
+    }else{
+
+        let scale = cvsW/imgW;
+
+        res.w = cvsW;
+        res.h = imgH * scale;
+        res.x = 0;
+        res.y = ( cvsH - res.h ) / 2;
+        res.scale = scale;
+
     }
 
     return res;

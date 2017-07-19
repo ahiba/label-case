@@ -1,4 +1,6 @@
 
+import {drawImage, addTempLayer} from 'drawingBoard/BoardRedux';
+
 let imgData = [
     {id: Math.random(), src: require("img/2.jpg")},
     {id: Math.random(), src: require("img/3.jpg")},
@@ -31,7 +33,6 @@ export const loadImage = () => (dispatch, getState) => {
         dispatch(switchPhoto(imgData[0]));
     }
 
-
 }
 
 export const switchPhoto = (photo) => (dispatch, getState) => {
@@ -39,7 +40,15 @@ export const switchPhoto = (photo) => (dispatch, getState) => {
     dispatch({
         type: SWITCH_PHOTO,
         photo
-    })
+    });
+
+
+
+    dispatch(drawImage(photo.src));
+
+    if( !getState().board.layersData[photo.id] ){
+        dispatch(addTempLayer());
+    }
 
 }
 

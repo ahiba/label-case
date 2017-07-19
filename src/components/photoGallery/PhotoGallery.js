@@ -18,6 +18,7 @@ class PhotoGallery extends Component{
         this.props.loadImage();
     }
 
+
     render(){
 
         let { imgData, switchPhoto, curtPhoto, nextPhoto, previousPhoto } = this.props;
