@@ -13,25 +13,26 @@ import * as actions from './BoardRedux';
 import S from './style.scss';
 
 import PaintingLayer from './Layer';
+import ClosedPrompt from './ClosedPrompt';
 
 class Board extends Component{
     constructor(props){
         super(props);
 
         this.state = {
-            firstSpotHit: false
+            overPointIndex: null
         };
 
         this.stageWidth = 760;
         this.stageHeight = 500;
 
-        this.fixFirstSpotHit = this.fixFirstSpotHit.bind(this);
+        this.fixSpotHitIndex = this.fixSpotHitIndex.bind(this);
 
     }
 
-    fixFirstSpotHit(hasHit){
+    fixSpotHitIndex(index){
         this.setState({
-            firstSpotHit: hasHit
+            overPointIndex: index
         });
     }
 
@@ -48,21 +49,45 @@ class Board extends Component{
 
     render(){
 
-        let {stageWidth, stageHeight, fixFirstSpotHit} = this;
+        let {stageWidth, stageHeight, fixSpotHitIndex} = this;
 
-        let {firstSpotHit} = this.state;
+        let {overPointIndex} = this.state;
 
-        let {drewImage, addSpot, layersData, curtPhotoID, alterLineClosed, addTempLayer} = this.props;
+        let {
+            drewImage,
+            addSpot,
+            layersData,
+            curtPhotoID,
+            alterLineClosed,
+            addTempLayer,
+            alterLayerHold,
+            editLayerDone,
+            alterLayerFill,
+            alterLayerSelected,
+            undo,
+            deleteLayer,
+            cancelAlterLayer,
+            movePoint,
+            moveLayer
+        } = this.props;
 
         let layerGroup = layersData[curtPhotoID];
 
         if(!layerGroup) return null;
 
-        let {layers} = layerGroup;
+        let {layers, holdingLayerID, curtLayerID, selectedLayerID} = layerGroup;
 
-        layers = layers.map(layer=>{
+        let curtLayer = null;
+        let holdingLayer = null;
+        let selectedLayerIndx;
 
-            let {id, points, lineColor, lineClosed} = layer;
+        layers = layers.map((layer, i)=>{
+
+            let {id, points, lineColor, lineClosed, fill} = layer;
+
+            if(holdingLayerID && holdingLayerID === id) holdingLayer = layer;
+            if(curtLayerID && curtLayerID === id) curtLayer = layer;
+            if(selectedLayerID && selectedLayerID === id) selectedLayerIndx = i;
 
             return (
                 <PaintingLayer
@@ -71,12 +96,38 @@ class Board extends Component{
                         layerID: id,
                         points,
                         lineColor,
-                        fixFirstSpotHit,
-                        lineClosed
+                        fixSpotHitIndex,
+                        overPointIndex,
+                        lineClosed,
+                        alterLayerFill,
+                        fill,
+                        alterLayerSelected,
+                        selectedLayerID,
+                        alterLayerHold,
+                        movePoint,
+                        stageWidth,
+                        stageHeight,
+                        curtLayerID,
+                        moveLayer
                     }}
                 />
             )
         });
+
+
+        if(selectedLayerID){
+            let tempArr = layers.splice( selectedLayerIndx,1);
+            layers = [...layers, ...tempArr];
+        }
+
+        // 计算出 ClosedPrompt 的 left 和 top
+
+        let {x: left, y: top} = holdingLayer ? holdingLayer.points[0] : {x:0,y:0};
+
+        left = stageWidth - left > 240 ? left : left - 230,
+        top = stageHeight - top > 210 ? top : top - 200;
+
+        // end 计算出 ClosedPrompt 的 left 和 top
 
         let imageBodyInfo = null;
 
@@ -96,14 +147,25 @@ class Board extends Component{
                     ref="stage"
 
                     onMouseDown={ev=>{
+
+                        let {className} = ev.target;
+
+                        if(className === 'Line') return;
+
+                        if(selectedLayerID &&  className==='Image') {
+                            alterLayerSelected(null);
+                            return;
+                        }
+
                         let {x,y} = this.getPointerPosition();
 
-                        if(firstSpotHit){
+                        if( overPointIndex===0 && curtLayer.points.length > 2 ){
                             // 闭合线条
                             alterLineClosed(true);
-                            addTempLayer();
+                            alterLayerHold(curtLayerID);
 
                         } else{
+                            if(ev.target.className === 'Circle') return;
                             addSpot(x, y);
                         }
 
@@ -128,6 +190,25 @@ class Board extends Component{
                     </Layer>
                     {layers}
                 </Stage>
+
+                {
+                    holdingLayer ? (
+                        <ClosedPrompt
+                            {...{
+                                left,
+                                top,
+                                editLayerDone,
+                                holdingLayerID,
+                                layerName: holdingLayer.layerName,
+                                attr: holdingLayer.attr,
+                                everDone: holdingLayer.everDone,
+                                undo,
+                                deleteLayer,
+                                cancelAlterLayer
+                            }}
+                        />
+                    ) : null
+                }
             </div>
         );
     }
