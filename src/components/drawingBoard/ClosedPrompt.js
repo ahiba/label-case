@@ -35,7 +35,7 @@ export default class ClosedPrompt extends Component{
 
         let {layerName, attr} = this.state;
 
-        let {top, left, editLayerDone, everDone, holdingLayerID, undo, deleteLayer, cancelAlterLayer} = this.props;
+        let {top, left, editLayerDone, everDone, holdingLayerID, undo, deleteLayer, cancelAlterLayer, shape} = this.props;
 
         return (
             <div className={S.closedPrompt} style={{
@@ -64,7 +64,7 @@ export default class ClosedPrompt extends Component{
                 >done</button>
 
                 {
-                    !everDone ? (
+                    !everDone && shape ===0 ? (
                         <button
                             onClick={ev=>undo(holdingLayerID)}
                         >undo</button>

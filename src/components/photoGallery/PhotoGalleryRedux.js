@@ -1,6 +1,8 @@
 
 import {drawImage, addTempLayer} from 'drawingBoard/BoardRedux';
 
+import {hintFinish, finishFirst} from 'common/util/Util';
+
 let imgData = [
     {id: Math.random(), src: require("img/2.jpg")},
     {id: Math.random(), src: require("img/3.jpg")},
@@ -36,6 +38,23 @@ export const loadImage = () => (dispatch, getState) => {
 }
 
 export const switchPhoto = (photo) => (dispatch, getState) => {
+
+    let {
+        photos:{curtPhoto:{id: curtPhotoID}},
+        board:{layersData}
+    } = getState();
+
+    let layerGroup = layersData[curtPhotoID];
+
+    if(layerGroup){
+
+        let {holdingLayerID, layers, curtLayerID} = layerGroup;
+
+        if(holdingLayerID || finishFirst(layers, curtLayerID)){
+            hintFinish();
+            return;
+        }
+    }
 
     dispatch({
         type: SWITCH_PHOTO,

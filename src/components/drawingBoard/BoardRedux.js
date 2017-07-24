@@ -1,10 +1,17 @@
 
 import Konva from 'konva';
 
+import {hintFinish, finishFirst} from 'common/util/Util';
+
+let oriStageWidth = 760;
+let oriStageHeight = 500;
+
 let initState = {
     drewImage: null,
-    layersData: {
-
+    layersData: {},
+    stage: {
+        stageWidth: oriStageWidth,
+        stageHeight: oriStageHeight
     }
 }
 
@@ -20,6 +27,7 @@ const UNDO = 'UNDO/label-case/Board';
 const DELETE_LAYER = 'DELETE_LAYER/label-case/Board';
 const MOVE_POINT = 'MOVE_POINT/label-case/Board';
 const MOVE_LAYER = 'MOVE_LAYER/label-case/Board';
+const ALTER_STAGE = 'ALTER_STAGE/label-case/Board';
 
 
 export const drawImage = (url) => (dispatch, getState) =>{
@@ -59,6 +67,17 @@ export const addSpot = (x, y) => (dispatch, getState) => {
 
 }
 
+export const genRect = (x, y) => (dispatch, getState) => {
+
+    dispatch(addSpot(x, y));
+    dispatch(addSpot(x, y));
+    dispatch(addSpot(x, y));
+    dispatch(addSpot(x, y));
+    dispatch(alterLineClosed(true));
+
+
+}
+
 export const alterLineClosed = (closed) => (dispatch, getState) => {
 
     let curtPhotoID = getState().photos.curtPhoto.id;
@@ -93,13 +112,15 @@ export const cancelAlterLayer = (cancelLayerID) => (dispatch, getState) => {
 export const editLayerDone = ( editLayerID, layerName, attr ) => (dispatch, getState) => {
 
     let curtPhotoID = getState().photos.curtPhoto.id;
+    let {shape} =  getState();
 
     dispatch({
         type: EDIT_LAYER_DONE,
         editLayerID,
         curtPhotoID,
         layerName,
-        attr
+        attr,
+        shapeType: shape
     });
 
     dispatch(addTempLayer());
@@ -121,6 +142,22 @@ export const alterLayerFill = ( fillLayerID, isFill ) => (dispatch, getState) =>
 export const alterLayerSelected = (selectedLayerID) => (dispatch, getState) => {
 
     let curtPhotoID = getState().photos.curtPhoto.id;
+
+    let {
+        board:{layersData}
+    } = getState();
+
+    let layerGroup = layersData[curtPhotoID];
+
+    if(layerGroup){
+
+        let {holdingLayerID, layers, curtLayerID} = layerGroup;
+
+        if(holdingLayerID || finishFirst(layers, curtLayerID)){
+            hintFinish();
+            return;
+        }
+    }
 
     dispatch({
         type: ALTER_LAYER_SELECTED,
@@ -179,6 +216,76 @@ export const moveLayer = (points, moveLayerID) => (dispatch, getState) => {
     });
 
 }
+export const adaptStage = () => (dispatch, getState) => {
+
+    let {stageWidth, stageHeight} = getState().board.stage;
+
+    let curtPhotoID = getState().photos.curtPhoto.id;
+
+    let evoScale = oriStageWidth/stageWidth;
+
+    dispatch({
+        type: ALTER_STAGE,
+        stageWidth: oriStageWidth,
+        stageHeight: oriStageHeight,
+        evoScale,
+        curtPhotoID
+    });
+
+}
+export const incrementStage = () => (dispatch, getState) => {
+
+    let {stageWidth, stageHeight} = getState().board.stage;
+
+    let curtPhotoID = getState().photos.curtPhoto.id;
+
+    let preWidth = stageWidth;
+
+    stageWidth*=1.2;
+    stageHeight*=1.2;
+
+    if(stageWidth>2760 || stageHeight>1500) return;
+
+
+    let evoScale = stageWidth/preWidth;
+
+    dispatch({
+        type: ALTER_STAGE,
+        stageWidth,
+        stageHeight,
+        evoScale,
+        curtPhotoID
+    });
+
+}
+export const decrementStage = () => (dispatch, getState) => {
+
+    let {stageWidth, stageHeight} = getState().board.stage;
+
+    let curtPhotoID = getState().photos.curtPhoto.id;
+
+    let preWidth = stageWidth;
+
+    stageWidth/=1.2;
+    stageHeight/=1.2;
+
+    if(stageWidth<760 || stageHeight<500){
+        stageWidth = oriStageWidth;
+        stageHeight = oriStageHeight;
+    }
+
+    let evoScale = stageWidth/preWidth;
+
+
+    dispatch({
+        type: ALTER_STAGE,
+        stageWidth,
+        stageHeight,
+        evoScale,
+        curtPhotoID
+    });
+
+}
 
 
 export default function board( state=initState, action ) {
@@ -194,6 +301,7 @@ export default function board( state=initState, action ) {
         editLayerID,
         layerName,
         attr,
+        shapeType,
         fillLayerID,
         isFill,
         selectedLayerID,
@@ -202,7 +310,10 @@ export default function board( state=initState, action ) {
         pointMoveLayerID,
         pointIndx,
         moveLayerID,
-        points
+        points,
+        stageWidth,
+        stageHeight,
+        evoScale
     } = action;
 
     let {layersData} = state;
@@ -234,7 +345,9 @@ export default function board( state=initState, action ) {
                         lineColor: Konva.Util.getRandomColor(),
                         fill: false,
                         lineClosed: false,
-                        everDone: false
+                        everDone: false,
+                        shapeType: null,
+                        oriPoints: []
                     }],
                     curtLayerID: tempLayerID,
                     holdingLayerID: null,
@@ -291,6 +404,7 @@ export default function board( state=initState, action ) {
                     layer.layerName = layerName;
                     layer.attr = attr;
                     layer.everDone = true;
+                    layer.shapeType = shapeType;
                 }
 
                 return layer;
@@ -373,8 +487,16 @@ export default function board( state=initState, action ) {
                 if( layer.id === pointMoveLayerID ){
 
                     let pt = layer.points[pointIndx];
-                    pt.x = pointX;
-                    pt.y = pointY;
+
+                    if(pointX!==null){
+                        pt.x = pointX;
+                    }
+
+                    if(pointY!==null){
+                        pt.y = pointY;
+                    }
+
+
                 }
                 return layer;
 
@@ -407,6 +529,24 @@ export default function board( state=initState, action ) {
                 ...layersData,
                 [curtPhotoID]: {...layerGroup, selectedLayerID  }
             }}
+        case ALTER_STAGE:
+
+            layers = layers.map((layer, i)=>{
+
+                layer.points = layer.points.map( ({x,y})=> ({x: x*evoScale, y: y*evoScale}) );
+
+                return layer;
+
+            });
+
+            return {
+                ...state,
+                stage: { stageWidth, stageHeight },
+                layersData: {
+                    ...layersData,
+                    [curtPhotoID]: {...layerGroup, layers}
+                }
+            }
         default:
             return state;
     }

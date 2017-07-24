@@ -26,6 +26,11 @@ class Board extends Component{
         this.stageWidth = 760;
         this.stageHeight = 500;
 
+
+        this.dragLimitControl = 8;
+
+        this.clickTime = 0;
+
         this.fixSpotHitIndex = this.fixSpotHitIndex.bind(this);
 
     }
@@ -49,7 +54,7 @@ class Board extends Component{
 
     render(){
 
-        let {stageWidth, stageHeight, fixSpotHitIndex} = this;
+        let { fixSpotHitIndex, dragLimitControl} = this;
 
         let {overPointIndex} = this.state;
 
@@ -68,7 +73,11 @@ class Board extends Component{
             deleteLayer,
             cancelAlterLayer,
             movePoint,
-            moveLayer
+            moveLayer,
+            shape,
+            genRect,
+            stageHeight,
+            stageWidth
         } = this.props;
 
         let layerGroup = layersData[curtPhotoID];
@@ -83,7 +92,7 @@ class Board extends Component{
 
         layers = layers.map((layer, i)=>{
 
-            let {id, points, lineColor, lineClosed, fill} = layer;
+            let {id, points, lineColor, lineClosed, fill, shapeType} = layer;
 
             if(holdingLayerID && holdingLayerID === id) holdingLayer = layer;
             if(curtLayerID && curtLayerID === id) curtLayer = layer;
@@ -108,7 +117,9 @@ class Board extends Component{
                         stageWidth,
                         stageHeight,
                         curtLayerID,
-                        moveLayer
+                        moveLayer,
+                        shapeType
+
                     }}
                 />
             )
@@ -159,15 +170,53 @@ class Board extends Component{
 
                         let {x,y} = this.getPointerPosition();
 
-                        if( overPointIndex===0 && curtLayer.points.length > 2 ){
-                            // 闭合线条
-                            alterLineClosed(true);
-                            alterLayerHold(curtLayerID);
+                        if(shape===0){
+                            if( overPointIndex===0 && curtLayer.points.length > 2 ){
+                                // 闭合线条
+                                alterLineClosed(true);
+                                alterLayerHold(curtLayerID);
 
-                        } else{
-                            if(ev.target.className === 'Circle') return;
-                            addSpot(x, y);
+                            } else{
+                                if(ev.target.className === 'Circle') return;
+                                addSpot(x, y);
+                            }
                         }
+
+                        if(shape===1){
+
+                            if(this.clickTime===0){
+                                if(ev.target.className === 'Circle') return;
+                                genRect(x,y);
+
+                                this.clickTime++;
+
+                            }else {
+                                alterLayerHold(curtLayerID);
+                                this.clickTime = 0;
+
+                            }
+
+
+                        }
+
+
+                    }}
+
+                    onMouseMove={ev=>{
+                        if(shape===0) return;
+                        if(holdingLayerID) return;
+
+                        if(this.clickTime !==1 ) return;
+
+                        let {x,y} = this.getPointerPosition();
+                        if( x < dragLimitControl || y < dragLimitControl || x > stageWidth || y > stageHeight  ) return;
+
+                        movePoint(curtLayerID, 0, x,y);
+
+                        movePoint(curtLayerID, 1, null,y);
+
+                        movePoint(curtLayerID, 3, x, null);
+
 
 
                     }}
@@ -204,7 +253,8 @@ class Board extends Component{
                                 everDone: holdingLayer.everDone,
                                 undo,
                                 deleteLayer,
-                                cancelAlterLayer
+                                cancelAlterLayer,
+                                shape
                             }}
                         />
                     ) : null
@@ -216,12 +266,16 @@ class Board extends Component{
 
 export default connect(
     state => {
-        let {drewImage, layersData} = state.board;
+        let {shape} = state;
+        let {drewImage, layersData, stage: {stageWidth, stageHeight}} = state.board;
         let {curtPhoto:{id}} = state.photos;
         return {
             drewImage,
             layersData,
-            curtPhotoID: id
+            curtPhotoID: id,
+            shape,
+            stageWidth,
+            stageHeight
         }
     },
     dispatch => (bindActionCreators({...actions}, dispatch))

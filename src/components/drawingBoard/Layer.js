@@ -31,7 +31,8 @@ export default class PaintingLayer extends Component{
             movePoint,
             stageWidth,
             stageHeight,
-            moveLayer
+            moveLayer,
+            shapeType,
         } = this.props;
 
         let linePoints = [];
@@ -68,7 +69,7 @@ export default class PaintingLayer extends Component{
                         onMouseOut={ ev=> fixSpotHitIndex(null) }
 
                         onDragStart={ev=>{
-                            if(this.oriPoints){
+                            if(oriPoints){
                                 this.newOriPoints = points.slice();
                             }
                         }}
@@ -80,14 +81,62 @@ export default class PaintingLayer extends Component{
                             if( x < dragLimitControl || y < dragLimitControl || x > stageWidth || y > stageHeight  ) return;
 
                             if( oriPoints ){
-                                oriPoints[i].x = x - this.newOriPoints[i].x + oriPoints[i].x;
+                                oriPoints[i].x = (x - this.newOriPoints[i].x + oriPoints[i].x);
                                 oriPoints[i].y = y - this.newOriPoints[i].y + oriPoints[i].y;
+
                             }
 
                             movePoint(layerID, i, x, y);
 
+                            if(shapeType===1){
+                                switch (i) {
+                                    case 0:
+                                        if( oriPoints ){
+                                            oriPoints[1].y = y - this.newOriPoints[1].y + oriPoints[1].y;
+                                            oriPoints[3].x = x - this.newOriPoints[3].x + oriPoints[3].x;
+
+                                        }
+                                        movePoint(layerID, 1, null,y);
+                                        movePoint(layerID, 3, x, null);
+
+                                        break;
+                                    case 1:
+                                        if( oriPoints ){
+                                            oriPoints[0].y = y - this.newOriPoints[0].y + oriPoints[0].y;
+                                            oriPoints[2].x = x - this.newOriPoints[2].x + oriPoints[2].x;
+
+                                        }
+                                        movePoint(layerID, 0, null,y);
+                                        movePoint(layerID, 2, x, null);
+
+                                        break;
+                                    case 2:
+                                        if( oriPoints ){
+                                            oriPoints[1].x = x - this.newOriPoints[1].x + oriPoints[1].x;
+                                            oriPoints[3].y = y - this.newOriPoints[3].y + oriPoints[3].y;
+
+                                        }
+                                        movePoint(layerID, 1, x, null);
+                                        movePoint(layerID, 3, null, y);
+
+                                        break;
+                                    case 3:
+                                        if( oriPoints ){
+                                            oriPoints[0].x = x - this.newOriPoints[0].x + oriPoints[0].x;
+                                            oriPoints[2].y = y - this.newOriPoints[2].y + oriPoints[2].y;
+
+                                        }
+                                        movePoint(layerID, 0, x, null);
+                                        movePoint(layerID, 2, null, y);
+
+                                        break;
+                                    default:
+
+                                }
+                            }
+
                         }}
-                        
+
                         dragBoundFunc={
                             ({x,y})=>{
 
@@ -135,7 +184,7 @@ export default class PaintingLayer extends Component{
                     onDblClick={ev=>{alterLayerHold(layerID)}}
 
                     onDragStart={ev=>{
-                        if( !this.oriPoints ){
+                        if( !oriPoints ){
                             this.oriPoints = points.slice();
                         }
                     }}
@@ -151,7 +200,6 @@ export default class PaintingLayer extends Component{
                             }
 
                         } );
-
                         moveLayer( newPointsArr, layerID);
 
                     }}
