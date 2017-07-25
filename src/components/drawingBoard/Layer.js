@@ -11,6 +11,21 @@ export default class PaintingLayer extends Component{
         this.newOriPoints = null;
     }
 
+    componentWillReceiveProps(np){
+        if( this.oriPoints && this.props.stageWidth !== np.stageWidth ){
+            this.oriPoints = this.oriPoints.map( ({x,y}, i)=>{
+
+                return {
+                    x: np.points[i].x - this.props.points[i].x + x,
+                    y: np.points[i].y - this.props.points[i].y + y
+
+                }
+
+            } );
+        }
+    }
+
+
     render(){
 
         let {dragLimitControl, oriPoints} = this;

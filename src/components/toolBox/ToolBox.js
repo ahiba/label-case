@@ -4,7 +4,7 @@ import {connect} from 'react-redux';
 import {bindActionCreators} from 'redux';
 
 import * as actions from './ToolBoxRedux';
-import {adaptStage, incrementStage, decrementStage} from 'drawingBoard/BoardRedux';
+import {adaptStage, incrementStage, decrementStage, undo} from 'drawingBoard/BoardRedux';
 
 class ToolBox extends Component{
     constructor(props){
@@ -13,7 +13,9 @@ class ToolBox extends Component{
 
     render(){
 
-        let {shape, changeShape, adaptStage, incrementStage, decrementStage}  = this.props;
+        let {shape, changeShape, adaptStage, incrementStage, decrementStage, undo, layersData, curtPhotoID}  = this.props;
+
+        let layerGroup = layersData[curtPhotoID];
 
         return (
             <ul className={S.toolButton}>
@@ -49,7 +51,13 @@ class ToolBox extends Component{
                     框选
                 </li>
 
-                <li>
+                <li
+                    onClick={ev=>{
+                        if(layerGroup && shape===0){
+                            undo(layerGroup.curtLayerID);
+                        }
+                    }}
+                >
                     <i></i>
                     上一步
                 </li>
@@ -61,12 +69,12 @@ class ToolBox extends Component{
 export default connect(
     state => {
 
-        let {shape} = state;
+        let {shape, board:{layersData}, photos:{curtPhoto:{id}}} = state;
 
-        return {shape}
+        return {shape, layersData, curtPhotoID:id}
     },
     dispatch => ({
         ...bindActionCreators(actions, dispatch),
-        ...bindActionCreators({adaptStage, incrementStage, decrementStage}, dispatch)
+        ...bindActionCreators({adaptStage, incrementStage, decrementStage,undo}, dispatch)
     })
 )(ToolBox);
