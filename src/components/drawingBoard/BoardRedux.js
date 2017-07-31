@@ -9,10 +9,6 @@ let oriStageHeight = 500;
 let initState = {
     drewImage: null,
     layersData: {},
-    stage: {
-        stageWidth: oriStageWidth,
-        stageHeight: oriStageHeight
-    }
 }
 
 const DRAW_IMAGE = 'DRAW_IMAGE/label-case/Board';
@@ -218,9 +214,11 @@ export const moveLayer = (points, moveLayerID) => (dispatch, getState) => {
 }
 export const adaptStage = () => (dispatch, getState) => {
 
-    let {stageWidth, stageHeight} = getState().board.stage;
-
     let curtPhotoID = getState().photos.curtPhoto.id;
+
+    let {stageWidth, stageHeight} = getState().board.layersData[curtPhotoID].stage;
+
+
 
     let evoScale = oriStageWidth/stageWidth;
 
@@ -235,9 +233,10 @@ export const adaptStage = () => (dispatch, getState) => {
 }
 export const incrementStage = () => (dispatch, getState) => {
 
-    let {stageWidth, stageHeight} = getState().board.stage;
 
     let curtPhotoID = getState().photos.curtPhoto.id;
+
+    let {stageWidth, stageHeight} = getState().board.layersData[curtPhotoID].stage;
 
     let preWidth = stageWidth;
 
@@ -260,9 +259,9 @@ export const incrementStage = () => (dispatch, getState) => {
 }
 export const decrementStage = () => (dispatch, getState) => {
 
-    let {stageWidth, stageHeight} = getState().board.stage;
-
     let curtPhotoID = getState().photos.curtPhoto.id;
+
+    let {stageWidth, stageHeight} = getState().board.layersData[curtPhotoID].stage;
 
     let preWidth = stageWidth;
 
@@ -351,7 +350,11 @@ export default function board( state=initState, action ) {
                     }],
                     curtLayerID: tempLayerID,
                     holdingLayerID: null,
-                    selectedLayerID: null
+                    selectedLayerID: null,
+                    stage: {
+                        stageWidth: oriStageWidth,
+                        stageHeight: oriStageHeight
+                    }
                 }
             }}
             break;
@@ -541,10 +544,9 @@ export default function board( state=initState, action ) {
 
             return {
                 ...state,
-                stage: { stageWidth, stageHeight },
                 layersData: {
                     ...layersData,
-                    [curtPhotoID]: {...layerGroup, layers}
+                    [curtPhotoID]: {...layerGroup, layers, stage: { stageWidth, stageHeight }}
                 }
             }
         default:

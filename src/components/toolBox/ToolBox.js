@@ -50,7 +50,7 @@ class ToolBox extends Component{
                     <i></i>
                     框选
                 </li>
-
+                
                 <li
                     onClick={ev=>{
                         if(layerGroup && shape===0){

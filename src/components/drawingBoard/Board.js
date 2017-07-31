@@ -75,16 +75,14 @@ class Board extends Component{
             movePoint,
             moveLayer,
             shape,
-            genRect,
-            stageHeight,
-            stageWidth
+            genRect
         } = this.props;
 
         let layerGroup = layersData[curtPhotoID];
 
         if(!layerGroup) return null;
 
-        let {layers, holdingLayerID, curtLayerID, selectedLayerID} = layerGroup;
+        let {layers, holdingLayerID, curtLayerID, selectedLayerID, stage: {stageWidth, stageHeight}} = layerGroup;
 
         let curtLayer = null;
         let holdingLayer = null;
@@ -119,7 +117,6 @@ class Board extends Component{
                         curtLayerID,
                         moveLayer,
                         shapeType
-
                     }}
                 />
             )
@@ -267,15 +264,13 @@ class Board extends Component{
 export default connect(
     state => {
         let {shape} = state;
-        let {drewImage, layersData, stage: {stageWidth, stageHeight}} = state.board;
+        let {drewImage, layersData} = state.board;
         let {curtPhoto:{id}} = state.photos;
         return {
             drewImage,
             layersData,
             curtPhotoID: id,
-            shape,
-            stageWidth,
-            stageHeight
+            shape
         }
     },
     dispatch => (bindActionCreators({...actions}, dispatch))

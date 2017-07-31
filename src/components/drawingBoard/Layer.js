@@ -61,6 +61,8 @@ export default class PaintingLayer extends Component{
             oriPoints.forEach(point=> (oriLinePoints.push(point.x, point.y)) );
         }
 
+        console.log(oriLinePoints);
+
         let pointsComp = null;
 
         if(selectedLayerID === layerID || curtLayerID === layerID){
