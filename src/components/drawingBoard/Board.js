@@ -151,7 +151,11 @@ class Board extends Component{
                 <Stage
                     width={stageWidth}
                     height={stageHeight}
-
+                    style={{
+                        width: "760px",
+                        height: "500px",
+                        overflow: stageWidth === 760 ? "hidden" : "auto"
+                    }}
                     ref="stage"
 
                     onMouseDown={ev=>{
