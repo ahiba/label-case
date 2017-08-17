@@ -168,7 +168,7 @@ class Board extends Component{
                             alterLayerSelected(null);
                             return;
                         }
-
+                        
                         let {x,y} = this.getPointerPosition();
 
                         if(shape===0){
