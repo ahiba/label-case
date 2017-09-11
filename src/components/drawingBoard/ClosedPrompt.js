@@ -17,7 +17,7 @@ export default class ClosedPrompt extends Component{
         ev.preventDefault();
         ev.stopPropagation();
 
-        let {holdingLayerID, editLayerDone} = this.props;
+        let {holdingLayerID, editLayerDone, everDone, shape} = this.props;
 
         let {layerName, attr} = this.state;
 
@@ -26,7 +26,7 @@ export default class ClosedPrompt extends Component{
             return;
         }
 
-        editLayerDone(holdingLayerID, layerName, attr);
+        editLayerDone(holdingLayerID, layerName, attr, everDone, shape);
     }
 
     render(){

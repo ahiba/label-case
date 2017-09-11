@@ -121,10 +121,10 @@ export const cancelAlterLayer = (cancelLayerID) => (dispatch, getState) => {
     dispatch(alterLayerHold(cancelLayerID));
 }
 
-export const editLayerDone = ( editLayerID, layerName, attr ) => (dispatch, getState) => {
+export const editLayerDone = ( editLayerID, layerName, attr, everDone, editLayerShapeType ) => (dispatch, getState) => {
 
     let curtPhotoID = getState().photos.curtPhoto.id;
-    let {shape} =  getState();
+
 
     dispatch({
         type: EDIT_LAYER_DONE,
@@ -132,8 +132,10 @@ export const editLayerDone = ( editLayerID, layerName, attr ) => (dispatch, getS
         curtPhotoID,
         layerName,
         attr,
-        shapeType: shape
+        shapeType: editLayerShapeType
     });
+
+    if(everDone===true) return;
 
     dispatch(addTempLayer());
 }
@@ -368,8 +370,8 @@ export default function board( state=initState, action ) {
                     holdingLayerID: null,
                     selectedLayerID: null,
                     stage: {
-                        stageWidth: oriStageWidth,
-                        stageHeight: oriStageHeight
+                        stageWidth: layerGroup.stage ? layerGroup.stage.stageWidth : oriStageWidth,
+                        stageHeight: layerGroup.stage ? layerGroup.stage.stageHeight : oriStageHeight
                     }
                 }
             }}

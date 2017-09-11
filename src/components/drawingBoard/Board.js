@@ -153,8 +153,7 @@ class Board extends Component{
                     height={stageHeight}
                     style={{
                         width: "760px",
-                        height: "500px",
-                        overflow: stageWidth === 760 ? "hidden" : "auto"
+                        height: "500px"
                     }}
                     ref="stage"
 
@@ -168,7 +167,7 @@ class Board extends Component{
                             alterLayerSelected(null);
                             return;
                         }
-                        
+
                         let {x,y} = this.getPointerPosition();
 
                         if(shape===0){
@@ -218,8 +217,6 @@ class Board extends Component{
 
                         movePoint(curtLayerID, 3, x, null);
 
-
-
                     }}
                 >
                     <Layer>
@@ -239,6 +236,7 @@ class Board extends Component{
 
                     </Layer>
                     {layers}
+
                 </Stage>
 
                 {
@@ -255,7 +253,7 @@ class Board extends Component{
                                 undo,
                                 deleteLayer,
                                 cancelAlterLayer,
-                                shape
+                                shape : holdingLayer.shapeType === null ? shape : holdingLayer.shapeType
                             }}
                         />
                     ) : null
