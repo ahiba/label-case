@@ -147,14 +147,15 @@ class Board extends Component{
         }
 
         return (
-            <div className={S.fl} >
+            <div className={S.fl}
+                style={{
+                    overflow: stageWidth === 760 ? 'hidden' : 'auto'
+                }}
+            >
                 <Stage
                     width={stageWidth}
                     height={stageHeight}
-                    style={{
-                        width: "760px",
-                        height: "500px"
-                    }}
+
                     ref="stage"
 
                     onMouseDown={ev=>{
