@@ -182,26 +182,36 @@ class Board extends Component{
                                 addSpot(x, y);
                             }
                         }
+                        // 关于this.clickTime
+                        // 0 处于新一次框选标注，点击可以添加点
+                        // 1 处于框选调整， 点击可进行浮层编辑
+                        // 2 处于浮层编辑阶段，但是尚未知道是否完成
 
                         if(shape===1){
+                            // 重置可编辑的状态，当没有图层hold， 且clickTime=2，上一次已经完成过编辑
+                            if(!holdingLayerID && this.clickTime===2){
+                                this.clickTime = 0;
+                            }
 
                             if(this.clickTime===0){
                                 if(ev.target.className === 'Circle') return;
                                 genRect(x,y);
 
-                                this.clickTime++;
+                                this.clickTime = 1;
 
-                            }else {
+                            }else if(this.clickTime===1){
+
                                 alterLayerHold(curtLayerID);
-                                this.clickTime = 0;
+                                this.clickTime = 2;
 
                             }
-
 
                         }
 
 
                     }}
+
+
 
                     onMouseMove={ev=>{
                         if(shape===0) return;
