@@ -52,7 +52,8 @@ export const addSpot = (x, y) => (dispatch, getState) => {
 
     let curtPhotoID = getState().photos.curtPhoto.id;
     let {curtLayerID} = getState().board.layersData[curtPhotoID];
-    // 作业布置
+
+
     let {
         board:{layersData}
     } = getState();
@@ -63,11 +64,12 @@ export const addSpot = (x, y) => (dispatch, getState) => {
 
         let {holdingLayerID} = layerGroup;
 
-        if(holdingLayerID ){
+        if(holdingLayerID){
             hintFinish();
             return;
         }
     }
+
 
     dispatch({
         type: ADD_SPOT,
@@ -80,6 +82,24 @@ export const addSpot = (x, y) => (dispatch, getState) => {
 }
 
 export const genRect = (x, y) => (dispatch, getState) => {
+
+    let curtPhotoID = getState().photos.curtPhoto.id;
+
+    let {
+        board:{layersData}
+    } = getState();
+
+    let layerGroup = layersData[curtPhotoID];
+
+    if(layerGroup){
+
+        let {holdingLayerID} = layerGroup;
+
+        if(holdingLayerID){
+            hintFinish();
+            return;
+        }
+    }
 
     dispatch(addSpot(x, y));
     dispatch(addSpot(x, y));
